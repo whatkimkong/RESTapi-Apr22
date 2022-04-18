@@ -4,17 +4,17 @@ import bodyParser from 'body-parser';
 import log from './config/log';
 import config from './config/config';
 import sampleRoutes from './routes/sample';
-// import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 const NAMESPACE = 'Server';
 const router = express();
 
 // Connect to MONGO
-/* mongoose.connect(config.mongo.url, config.mongo.options).then(res => {
+mongoose.connect(config.mongo.url, config.mongo.options).then(res => {
     log.info(NAMESPACE, 'Connected successfully to MongoDB!');
 }).catch(err => {
     log.error(NAMESPACE, err.message, err)
-}); */
+});
 
 // Log the request - MIDDLEWARE
 router.use((req, res, next) => {
