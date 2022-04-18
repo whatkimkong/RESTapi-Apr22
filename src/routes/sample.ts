@@ -1,4 +1,4 @@
-import express from "../../.gitignore/node_modules/@types/express";
+import express from "express";
 import { sampleHealthCheck } from "../controllers/sample";
 
 const router = express.Router();

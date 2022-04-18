@@ -1,4 +1,4 @@
-import dotenv from '../../.gitignore/node_modules/dotenv/lib/main';
+import dotenv from 'dotenv';
 
 dotenv.config();
 

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from '../../.gitignore/node_modules/@types/express';
+import { Request, Response, NextFunction } from 'express';
 import log from '../config/log';
 
 const NAMESPACE = 'Sample Controller';
