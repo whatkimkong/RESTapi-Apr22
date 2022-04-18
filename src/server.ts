@@ -4,17 +4,25 @@ import bodyParser from 'body-parser';
 import log from './config/log';
 import config from './config/config';
 import sampleRoutes from './routes/sample';
+// import mongoose from 'mongoose';
 
 const NAMESPACE = 'Server';
 const router = express();
 
+// Connect to MONGO
+/* mongoose.connect(config.mongo.url, config.mongo.options).then(res => {
+    log.info(NAMESPACE, 'Connected successfully to MongoDB!');
+}).catch(err => {
+    log.error(NAMESPACE, err.message, err)
+}); */
+
 // Log the request - MIDDLEWARE
 router.use((req, res, next) => {
-    log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`)
+    log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`);
 
     // LISTENER when the response is finished
     res.on('finish', () => {
-        log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}], STATUS - [${res.statusCode}]`)
+        log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}], STATUS - [${res.statusCode}]`);
     });
 
     next();
@@ -22,17 +30,17 @@ router.use((req, res, next) => {
 
 // Parse the request - MIDDLEWARE
 // so no need to Parse on the React Frontend side of Apps
-router.use(bodyParser.urlencoded({extended: false}));
+router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 // API rules  - MIDDLEWARE
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Origin', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    if (req.method == 'OPTIONS'){
-        res.header('Access-Control-Allow-Origin', 'GET PATCH DELETE POST PUT',);
+    if (req.method == 'OPTIONS') {
+        res.header('Access-Control-Allow-Origin', 'GET PATCH DELETE POST PUT');
         return res.status(200).json({});
-    };
+    }
 
     next();
 });
