@@ -1,14 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
-import log from '../config/log';
+import mongoose from 'mongoose';
+// import log from '../config/log';
+import Sample from '../models/Sample';
 
 const NAMESPACE = 'Sample Controller';
 
-const sampleHealthCheck = (req: Request, res: Response, next: NextFunction) => {
-    log.info(NAMESPACE, `Sample health check route called.`);
-
+const getAllSamples = (req: Request, res: Response, next: NextFunction) => {
+    Sample.find().exec().then(data => {
     return res.status(200).json({
-        message: 'pong'
+            samples: data,
+            count: data.length,
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            message: err.message,
+            err
+        })
     });
 };
 
-export { sampleHealthCheck };
+const createASample = (req: Request, res: Response, next: NextFunction) => {
+    let { group, meta} = req.body;
+    const sample = new Sample({
+        _id: new mongoose.Types.ObjectId(),
+        group,
+        meta
+    });
+
+    return sample.save().then(data => {
+        return res.status(200).json({
+            sample: data,
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            message: err.message,
+            err
+        })
+    });
+};
+
+export default { getAllSamples, createASample };

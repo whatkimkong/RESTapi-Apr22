@@ -1,8 +1,10 @@
+import chalk from "chalk";
+
 const getTimeStamp = (): string => {
     return new Date().toISOString();
 };
 
-const info = (namespace: string, message: string, obj?: any) => {
+const info = (namespace: string, message: string , obj?: any) => {
     if (obj) {
         console.log(`[${getTimeStamp()}] [INFO] [${namespace}] ${message}`, obj);
     } else {
