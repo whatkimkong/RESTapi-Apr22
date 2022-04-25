@@ -1,3 +1,4 @@
+import { Response, Request, NextFunction } from 'express';
 import http from 'http';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -19,7 +20,7 @@ mongoose.connect(config.mongo.url, config.mongo.options).then(res => {
 
 // Log the request - MIDDLEWARE
 router.use((req, res, next) => {
-    log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`);
+    // log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`);
     res.on('finish', () => {
         // Log the res
         log.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`);
@@ -48,6 +49,14 @@ router.use((req, res, next) => {
 router.use('/sample', sampleRoutes);
 router.use('/heart', heartbeatRoutes);
 
+const path = require("path");
+router.use(express.static(path.join(__dirname, "/src/public")));
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+  // If no routes match, send them the HTML.
+  res.sendFile(__dirname + "/src/public/index.html");
+});
+
 // Error-handling
 router.use((req, res, next) => {
     const error = new Error('not found');
@@ -58,3 +67,5 @@ router.use((req, res, next) => {
 // SERVER
 const httpServer = http.createServer(router);
 httpServer.listen(config.server.port, () => log.info(NAMESPACE, `Server running on ${config.server.hostname}:${config.server.port}`));
+
+module.exports = router;
