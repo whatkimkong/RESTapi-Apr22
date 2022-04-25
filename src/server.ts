@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import log from './config/log';
 import config from './config/config';
 import sampleRoutes from './routes/sample';
+import heartbeatRoutes from './routes/heartbeats';
 import mongoose from 'mongoose';
 
 const NAMESPACE = 'Server';
@@ -19,12 +20,10 @@ mongoose.connect(config.mongo.url, config.mongo.options).then(res => {
 // Log the request - MIDDLEWARE
 router.use((req, res, next) => {
     log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`);
-
-    // LISTENER when the response is finished
     res.on('finish', () => {
-        log.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}], STATUS - [${res.statusCode}]`);
-    });
-
+        // Log the res
+        log.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`);
+    })
     next();
 });
 
@@ -41,12 +40,13 @@ router.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', 'GET PATCH DELETE POST PUT');
         return res.status(200).json({});
     }
-
     next();
 });
 
-// ROUTES
-router.use('/api', sampleRoutes);
+// ROUTES 
+/* connected to our routes with optional prefix url */
+router.use('/sample', sampleRoutes);
+router.use('/heart', heartbeatRoutes);
 
 // Error-handling
 router.use((req, res, next) => {
