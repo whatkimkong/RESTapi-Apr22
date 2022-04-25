@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 import { Schema } from 'mongoose';
-import ISample from "../interfaces/sample";
+import ISample from "../interfaces/ISample";
 
 const SampleSchema: Schema = new Schema(
     {
-        group: { type: String, required: true },
-        meta: { required: false }
+        name: { type: String, required: true },
+        meta: { type: {}, required: false },
     },
     {
         timestamps: true
