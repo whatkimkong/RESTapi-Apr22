@@ -80,19 +80,30 @@ const getGroup = (req: Request, res: Response, next: NextFunction) => {
  * should increment instance number on update
 */
 const createInstance = (req: Request, res: Response, next: NextFunction) => {
-    const instanceId = req.params.instanceId;
-    const groupId = req.params.groupId;
+    const { groupId, instanceId } = req.params;
     Instance.findOneAndUpdate({$and: [{group: groupId}, {id: instanceId}]}, {
         id: instanceId,
         group: groupId,
         meta: req.body,
         }, {new: true, upsert: true})
-    .then(data => {
-        Group.findOneAndUpdate({group: data.group}, {
-        group: data.group, $inc: {instance: 1}}, {new: true, upsert: true})
-    }).then(data => {
-         return res.status(200).json({ data })
-    }).catch(err => {
+    .then((instance: any) => {
+        if (instance.created_at === instance.updated_at){
+            Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true})
+        .then((group: any) => {
+            console.log(group)
+            return res.status(200).json({ group, message: "new instance added to group" })
+        }).catch((err: any) => {
+            console.log(err)
+            return res.status(500).json({
+                message: err.message,
+                err
+            })
+        });
+        } else {
+            return res.status(200).json({ instance, message: "instance updated"})
+        }
+    }).catch((err: any) => {
+        console.log(err)
         return res.status(500).json({
             message: err.message,
             err
@@ -127,7 +138,8 @@ async function deleteOldHeartbeat() {
   
     // search for documents last updated past the timeframe, using $lt operator & delete them
     const oldDocs = await Instance.find({"updated_at" : {$lt : timeLimit }})
-    console.log({oldDocs}, "documents to be deleted")
+    oldDocs.length > 0 ? console.log({oldDocs}, "documents to be deleted") : null;
+
     const docsToDelete = await Instance.deleteMany({"updated_at" : {$lt : timeLimit }})
    // recall the function after 1 days, you can change the frequence
    setTimeout(async () => {
