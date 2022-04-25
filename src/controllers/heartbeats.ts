@@ -90,10 +90,8 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
         if (instance.created_at === instance.updated_at){
             Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true})
         .then((group: any) => {
-            console.log(group)
             return res.status(200).json({ group, message: "new instance added to group" })
         }).catch((err: any) => {
-            console.log(err)
             return res.status(500).json({
                 message: err.message,
                 err
@@ -103,7 +101,6 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
             return res.status(200).json({ instance, message: "instance updated"})
         }
     }).catch((err: any) => {
-        console.log(err)
         return res.status(500).json({
             message: err.message,
             err
