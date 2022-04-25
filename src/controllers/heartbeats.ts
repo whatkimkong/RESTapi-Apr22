@@ -87,7 +87,7 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
         meta: req.body,
         }, {new: true, upsert: true})
     .then((instance: any) => {
-        // if created right now - add to group otherwise create new group
+        // if created right now - add to group otherwise create new group - NOT WORKING - why?
         if (instance.created_at === instance.updated_at){
             Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true})
         .then((group: any) => {
