@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-// import log from '../config/log';
 import Sample from '../models/Sample';
 
 const NAMESPACE = 'Sample Controller';
@@ -20,11 +19,11 @@ const getAllSamples = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const createASample = (req: Request, res: Response, next: NextFunction) => {
-    let { group, meta} = req.body;
+    let { name, meta } = req.body;
     const sample = new Sample({
         _id: new mongoose.Types.ObjectId(),
-        group,
-        meta
+        name,
+        meta,
     });
 
     return sample.save().then(data => {

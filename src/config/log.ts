@@ -1,5 +1,3 @@
-import chalk from "chalk";
-
 const getTimeStamp = (): string => {
     return new Date().toISOString();
 };
