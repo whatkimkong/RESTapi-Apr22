@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Instance from '../models/Heartbeats/Instance';
 import Group from '../models/Heartbeats/Group';
+import IInsResponse from "../interfaces/IHeartbeats/IInstance";
+import IGroupResponse from "../interfaces/IHeartbeats/IGroups"
 // import mongoose from 'mongoose'; // path _id is required -- problem
 
 /*
@@ -86,13 +88,13 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
         group: groupId,
         meta: req.body,
         }, {new: true, upsert: true})
-    .then((instance: any) => {
+    .then((instance: IInsResponse) => {
         // if created right now - add to group otherwise create new group - NOT WORKING - why?
-        if (instance.created_at === instance.updated_at){
+        if (instance.createdAt === instance.updatedAt){
             Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true})
-        .then((group: any) => {
+        .then((group: IGroupResponse) => {
             return res.status(200).json({ group, message: "new instance added to group" })
-        }).catch((err: any) => {
+        }).catch((err) => {
             return res.status(500).json({
                 message: err.message,
                 err
@@ -101,7 +103,7 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
         } else {
             return res.status(200).json({ instance, message: "instance updated"})
         }
-    }).catch((err: any) => {
+    }).catch((err) => {
         return res.status(500).json({
             message: err.message,
             err
