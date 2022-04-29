@@ -5,8 +5,6 @@ import IInsResponse from "../interfaces/IHeartbeats/IInstance";
 // import IGroupRaw from '../interfaces/IHeartbeats/IGroups';
 // import IGroupResponse from  "../interfaces/IHeartbeats/IGroups";
 
-// import mongoose from 'mongoose'; // path _id is required -- problem
-
 /*
 POST /:group/:id - createInstance
 GET / - getAllGroups - NEEDS populating
