@@ -16,22 +16,15 @@ GET /:group - getAllInstances - timestamps missing - cant access object properti
 
 const NAMESPACE = 'Heartbeats Controller';
 
-// route 'heart/get/' 
-/** WANT each group listed with their instances & timestamps
- * NOT CURRENTLY WORKING
- */
+// route 'heart/get/' NOT CURRENTLY WORKING
+/** returns the total number of instances for each group and their first and last heartbeat
+ * sorts by createdAt and updatedAt Timestamps
+ * Group Model has instances which is a count incremented during Instance creation
+ * NEED: FIX .populate('group') so result !== null  */
 const getAllGroups = (req: Request, res: Response, next: NextFunction) => {
-    Instance.find().exec().then(group => {
-        let testing: {group: string, instance :number}[] = [];
-        for (let i=0; i< group.length; i++){
-            testing.find(obj => {
-                if (obj.group == group[i].group){
-                    obj.instance++
-                } else {
-                    testing.push({group: group[i].group, instance: 1})
-                }})
-        }
-        return res.status(200).json({ testing })
+    Group.find().sort({createdAt: 1 , updatedAt: 1 }).exec().then(group => {
+        return res.status(200).json({ group
+        })
     }).catch(err => {
         return res.status(500).json({
             message: err.message,
@@ -40,34 +33,14 @@ const getAllGroups = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-/** CONTRARY TO ABOVE -- would rather use relational database Group Model */
-/* BUT NOT CURRENTLY WORKING
-const getAllGroups = (req: Request, res: Response, next: NextFunction) => {
-    Group.find().exec().then(group => {
-    return res.status(200).json({ group })
-    }).catch(err => {
-        return res.status(500).json({
-            message: err.message,
-            err
-        })
-    });
-}; */
-
 // route 'heart/get/:groupId'
-/** TIMESTAMPS NOT YET ACCESSIBLE - typescript problem?
- *  finds by the groupId param
- * sorts by createdAt and updatedAt Timestamps
- * returns the total number of instances for this group and first and last heartbeat
-*/
+/** returns the total number of instances for this group
+ * Extra: sorts by createdAt and updatedAt Timestamps */
 const getGroup = (req: Request, res: Response, next: NextFunction) => {
     const groupId = req.params.groupId;
-    Instance.find({group: groupId}).sort({createdAt: 1 , updatedAt: 1 }).exec().then(data => {
+    Instance.find({group: groupId}).sort({createdAt: 1 , updatedAt: 1 }).then(data => {
     return res.status(200).json({
-            group: groupId,
-            instances: data.length,
-            data: data,
-            // createdAt: data[0].createdAt,
-            // updatedAt: data[data.length].updatedAt,
+            data,
         })
     }).catch(err => {
         return res.status(500).json({
@@ -81,8 +54,7 @@ const getGroup = (req: Request, res: Response, next: NextFunction) => {
 /** upsert true -- so if Instance exists update
  * if not, create a new document,
  * then do the same for Group Model
- * should increment instance number on update
-*/
+ * should increment instance number on update */
 const createInstance = (req: Request, res: Response, next: NextFunction) => {
     const { groupId, instanceId } = req.params;
     Instance.findOneAndUpdate({$and: [{group: groupId}, {id: instanceId}]}, {
@@ -111,8 +83,7 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
 // route 'heart/delete/:group/:id' 
 /** first 'finds' the group by its params
  * then checks that its id === the params
- * then deletes
-*/
+ * then deletes */
 const deleteInstance = (req: Request, res: Response, next: NextFunction) => {
     const groupId = req.params.groupId;
     const instanceId = req.params.instanceId;
@@ -126,26 +97,23 @@ const deleteInstance = (req: Request, res: Response, next: NextFunction) => {
     });
 }; 
 
-// IMPLETMENT timeframed delete function
-async function deleteOldHeartbeat() {
-    let date = new Date();
-    let timeLimit = new Date();
-    // subtract timeLimit from the time now
-    timeLimit.setMinutes(date.getMinutes()-30);
-  
-    // search for documents last updated past the timeframe, using $lt operator & delete them
-    const oldDocs = await Instance.find({"updated_at" : {$lt : timeLimit }})
-    oldDocs.length > 0 ? console.log({oldDocs}, "documents to be deleted") : null;
+// Timeframed delete function
+setInterval(async () => {
+        await async function deleteOldHeartbeat() {
+        let date = new Date();
+        let timeLimit = new Date();
+        // subtract timeLimit from the time now
+        timeLimit.setMinutes(date.getMinutes()-30);
+    
+        // search for documents last updated past the timeframe, using $lt operator & delete them
+        const oldDocs = await Instance.find({"updated_at" : {$lt : timeLimit }})
+        oldDocs.length > 0 ? console.log({oldDocs}, "documents to be deleted") : null;
 
-    const docsToDelete = await Instance.deleteMany({"updated_at" : {$lt : timeLimit }})
-   // recall the function after 1 days, you can change the frequence
-   setTimeout(async () => {
-       await deleteOldHeartbeat();
-   }, 86400); 
-}
-
-// call deleteOldHeartBeat to start its loop recall
-// deleteOldHeartbeat();
+        const docsToDelete = await Instance.deleteMany({"updated_at" : {$lt : timeLimit }})
+        docsToDelete ? console.log({docsToDelete}, "documents successfully deleted") : null;
+        }
+// recall the function after 15 mins, you can change the frequence (previously 1 day: 86400)
+}, 900); // TO BE REFACTORED: process.env.DELETE_TIMEFRAME | 900 (where the latter should be a default)
 
 // route 'heart/get/instances'
 /** Extra route 
