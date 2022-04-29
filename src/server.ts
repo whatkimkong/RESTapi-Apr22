@@ -49,14 +49,6 @@ router.use((req, res, next) => {
 router.use('/sample', sampleRoutes);
 router.use('/heart', heartbeatRoutes);
 
-const path = require("path");
-router.use(express.static(path.join(__dirname, "/src/public")));
-
-router.use((req: Request, res: Response, next: NextFunction) => {
-  // If no routes match, send them the HTML.
-  res.sendFile(__dirname + "/src/public/index.html");
-});
-
 // Error-handling
 router.use((req, res, next) => {
     const error = new Error('not found');
