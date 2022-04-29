@@ -9,9 +9,10 @@ import IInsResponse from "../interfaces/IHeartbeats/IInstance";
 
 /*
 POST /:group/:id - createInstance
-GET / - getAllGroups -- CURRENTLY MALFUNCTIONING --
+GET / - getAllGroups - NEEDS populating
 DELETE /:group/:id - deleteInstance
-GET /:group - getAllInstances - timestamps missing - cant access object properties - typescript issue?
+GET /:group - getGroup
+timeframed delete - NEEDS revision
 */
 
 const NAMESPACE = 'Heartbeats Controller';
@@ -19,10 +20,11 @@ const NAMESPACE = 'Heartbeats Controller';
 // route 'heart/get/' NOT CURRENTLY WORKING
 /** returns the total number of instances for each group and their first and last heartbeat
  * sorts by createdAt and updatedAt Timestamps
+ * hides __v and _id
  * Group Model has instances which is a count incremented during Instance creation
  * NEED: FIX .populate('group') so result !== null  */
 const getAllGroups = (req: Request, res: Response, next: NextFunction) => {
-    Group.find().sort({createdAt: 1 , updatedAt: 1 }).exec().then(group => {
+    Group.find().sort({createdAt: 1 , updatedAt: 1 }).select('-__v -_id').exec().then(group => {
         return res.status(200).json({ group
         })
     }).catch(err => {
@@ -113,7 +115,7 @@ setInterval(async () => {
         docsToDelete ? console.log({docsToDelete}, "documents successfully deleted") : null;
         }
 // recall the function after 15 mins, you can change the frequence (previously 1 day: 86400)
-}, 900); // TO BE REFACTORED: process.env.DELETE_TIMEFRAME | 900 (where the latter should be a default)
+}, 60); // TO BE REFACTORED: process.env.DELETE_TIMEFRAME | 900 (where the latter should be a default)
 
 // route 'heart/get/instances'
 /** Extra route 
