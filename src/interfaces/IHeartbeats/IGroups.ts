@@ -14,3 +14,26 @@ export default interface IGroupResponse extends Document {
     _id: string;
     __v: number;
 }
+
+export default interface IGroupRaw extends Document {
+    lastErrorObject: {
+        n: number,
+        updatedExisting: boolean,
+    };
+    value: {
+        _id: string,
+        group: string,
+        __v: number,
+        createdAt: string,
+        instances: number,
+        updatedAt: string,
+    }
+    ok: number;
+    $clusterTime: {
+        clusterTime: {},
+        signature: {}, 
+    };
+    operationTime: {
+        $timestamp: string,
+    };
+}

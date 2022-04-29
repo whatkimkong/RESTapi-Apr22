@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import Instance from '../models/Heartbeats/Instance';
 import Group from '../models/Heartbeats/Group';
 import IInsResponse from "../interfaces/IHeartbeats/IInstance";
-import IGroupResponse from "../interfaces/IHeartbeats/IGroups"
+// import IGroupRaw from '../interfaces/IHeartbeats/IGroups';
+// import IGroupResponse from  "../interfaces/IHeartbeats/IGroups";
+
 // import mongoose from 'mongoose'; // path _id is required -- problem
 
 /*
@@ -89,20 +91,15 @@ const createInstance = (req: Request, res: Response, next: NextFunction) => {
         meta: req.body,
         }, {new: true, upsert: true})
     .then((instance: IInsResponse) => {
-        // if created right now - add to group otherwise create new group - NOT WORKING - why?
-        if (instance.createdAt === instance.updatedAt){
-            Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true})
-        .then((group: IGroupResponse) => {
-            return res.status(200).json({ group, message: "new instance added to group" })
+        Group.findOneAndUpdate({group: instance._id}, { $inc: {instances: 1}}, {new: true, upsert: true, rawResult: true})
+        .then((group: any) => {
+            group.lastErrorObject.updatedExisting === true ? res.status(200).json({ instance, message: "instance updated"}) : res.status(200).json({ instance, message: "new instance added to this group" })
         }).catch((err) => {
             return res.status(500).json({
                 message: err.message,
                 err
             })
         });
-        } else {
-            return res.status(200).json({ instance, message: "instance updated"})
-        }
     }).catch((err) => {
         return res.status(500).json({
             message: err.message,
@@ -148,7 +145,7 @@ async function deleteOldHeartbeat() {
 }
 
 // call deleteOldHeartBeat to start its loop recall
-deleteOldHeartbeat();
+// deleteOldHeartbeat();
 
 // route 'heart/get/instances'
 /** Extra route 
